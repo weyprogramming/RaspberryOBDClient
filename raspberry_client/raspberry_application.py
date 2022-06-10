@@ -1,9 +1,10 @@
 from genericpath import exists
+from pathlib import Path
 import json, requests, obd, datetime, time, pathlib, os
 class obdRestApiRequests():
 
-    BASE_URL = "http://127.0.0.1:8000/api/v1/"
-    BASE_DIR = r"C:/Users/weyro/OneDrive/Programming/Bachelorarbeit/REST_API/raspberry_obd/raspberry_client"
+    BASE_URL = "https://obd-rest-service.herokuapp.com/api/v1/"
+    BASE_DIR = Path(__file__).resolve().parent
 
     auth_token = {}
     current_measurement_id = None
@@ -30,16 +31,15 @@ class obdRestApiRequests():
             return False
     
     def check_json_directory(self):
-        print(str(self.BASE_DIR))
-        json_dir_path = os.path.join(str(self.BASE_DIR), r"/measurement_transfer/")
-        filenames = os.listdir(json_dir_path)
+        json_dir_path = self.BASE_DIR / "measurement_transfer"
+        filenames = os.listdir(json_dir_path.__str__())
         for filename in filenames:
-            current_file_path = json_dir_path + filename
-            with open(current_file_path, 'r') as fp:
+            current_file_path = json_dir_path / filename
+            current_file_path_str = str(current_file_path)
+            with open(current_file_path_str, "r") as fp:
                 measurement_point = json.load(fp)
                 self.post_measurement_point(measurement_data=measurement_point)
-            os.remove(current_file_path)
-        self.check_json_directory()
+            os.remove(current_file_path_str)
 
     
 class obdConnection(obd.Async):
@@ -94,8 +94,7 @@ class obdConnection(obd.Async):
 
 if __name__ == "__main__":
     client = obdRestApiRequests()
-    client.set_auth_token("testuser", "testpassword")
-    print(client.auth_token)
+    client.set_auth_token("weyro", "Venire999")
     client.register_new_measurement()
     client.check_json_directory()
 
